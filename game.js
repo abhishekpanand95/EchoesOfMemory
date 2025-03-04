@@ -22,12 +22,18 @@ let wallDirection = 1;
 // Load assets
 const assets = {
     robot: new Image(),
-    fruit: new Image(),
+    fruits: [
+        new Image(),
+        new Image(),
+        new Image()
+    ],
     wall: new Image()
 };
 
 assets.robot.src = 'assets/robot.png';
-assets.fruit.src = 'assets/fruit.png';
+assets.fruits[0].src = 'assets/apple.png';
+assets.fruits[1].src = 'assets/banana.png';
+assets.fruits[2].src = 'assets/orange.png';
 assets.wall.src = 'assets/wall.png';
 
 // Initialize game
@@ -255,11 +261,11 @@ function draw() {
     }
     
     // Draw fruits
-    for (let fruit of fruits) {
+    for (let i = 0; i < fruits.length; i++) {
         ctx.drawImage(
-            assets.fruit,
-            fruit.x * CELL_SIZE + MARGIN,
-            fruit.y * CELL_SIZE + MARGIN,
+            assets.fruits[i % assets.fruits.length],
+            fruits[i].x * CELL_SIZE + MARGIN,
+            fruits[i].y * CELL_SIZE + MARGIN,
             CELL_SIZE,
             CELL_SIZE
         );
