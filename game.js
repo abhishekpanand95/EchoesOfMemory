@@ -17,7 +17,6 @@ let gameLoop;
 let particles = [];
 let movingWalls = [];
 let wallSpeed = 0.5;
-let wallDirection = 1;
 
 // Initialize game
 function init() {
@@ -92,22 +91,27 @@ function generateMaze() {
             x = Math.floor(Math.random() * MAZE_SIZE);
             y = Math.floor(Math.random() * MAZE_SIZE);
         } while (maze[y][x] === 1 || (x === player.x && y === player.y));
-        movingWalls.push({ x, y, originalY: y });
+        movingWalls.push({ 
+            x, 
+            y, 
+            originalY: y,
+            direction: Math.random() < 0.5 ? 1 : -1  // Random direction for each wall
+        });
     }
 }
 
 // Update moving walls
 function updateMovingWalls() {
     for (let wall of movingWalls) {
-        wall.y += wallSpeed * wallDirection;
+        wall.y += wallSpeed * wall.direction;
         
         // Check boundaries
         if (wall.y >= wall.originalY + 2) {
             wall.y = wall.originalY + 2;
-            wallDirection = -1;
+            wall.direction = -1;
         } else if (wall.y <= wall.originalY - 2) {
             wall.y = wall.originalY - 2;
-            wallDirection = 1;
+            wall.direction = 1;
         }
     }
 }
@@ -223,8 +227,16 @@ function draw() {
     for (let y = 0; y < MAZE_SIZE; y++) {
         for (let x = 0; x < MAZE_SIZE; x++) {
             if (maze[y][x] === 1) {
-                // Draw wall
-                ctx.fillStyle = NEON_BLUE;
+                // Draw wall with gradient
+                const gradient = ctx.createLinearGradient(
+                    x * CELL_SIZE + MARGIN,
+                    y * CELL_SIZE + MARGIN,
+                    x * CELL_SIZE + MARGIN + CELL_SIZE,
+                    y * CELL_SIZE + MARGIN + CELL_SIZE
+                );
+                gradient.addColorStop(0, NEON_BLUE);
+                gradient.addColorStop(1, '#0088ff');
+                ctx.fillStyle = gradient;
                 ctx.fillRect(
                     x * CELL_SIZE + MARGIN,
                     y * CELL_SIZE + MARGIN,
@@ -246,7 +258,16 @@ function draw() {
     
     // Draw moving walls
     for (let wall of movingWalls) {
-        ctx.fillStyle = NEON_BLUE;
+        // Draw moving wall with gradient
+        const gradient = ctx.createLinearGradient(
+            wall.x * CELL_SIZE + MARGIN,
+            wall.y * CELL_SIZE + MARGIN,
+            wall.x * CELL_SIZE + MARGIN + CELL_SIZE,
+            wall.y * CELL_SIZE + MARGIN + CELL_SIZE
+        );
+        gradient.addColorStop(0, '#ff0000');  // Red for moving walls
+        gradient.addColorStop(1, '#ff4444');
+        ctx.fillStyle = gradient;
         ctx.fillRect(
             wall.x * CELL_SIZE + MARGIN,
             wall.y * CELL_SIZE + MARGIN,
@@ -264,8 +285,11 @@ function draw() {
         );
     }
     
-    // Draw fruits
+    // Draw fruits with glow effect
     for (let fruit of fruits) {
+        // Add glow
+        ctx.shadowColor = NEON_PURPLE;
+        ctx.shadowBlur = 15;
         ctx.fillStyle = NEON_PURPLE;
         ctx.beginPath();
         ctx.arc(
@@ -276,9 +300,13 @@ function draw() {
             Math.PI * 2
         );
         ctx.fill();
+        // Reset shadow
+        ctx.shadowBlur = 0;
     }
     
-    // Draw player
+    // Draw player with glow effect
+    ctx.shadowColor = NEON_GREEN;
+    ctx.shadowBlur = 15;
     ctx.fillStyle = NEON_GREEN;
     ctx.beginPath();
     ctx.arc(
@@ -289,6 +317,8 @@ function draw() {
         Math.PI * 2
     );
     ctx.fill();
+    // Reset shadow
+    ctx.shadowBlur = 0;
     
     // Draw particles
     for (let p of particles) {
