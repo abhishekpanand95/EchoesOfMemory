@@ -16,7 +16,7 @@ let score = 0;
 let gameLoop;
 let particles = [];
 let movingWalls = [];
-let wallSpeed = 0.5;
+let wallSpeed = 0.3;  // Slower speed
 
 // Initialize game
 function init() {
@@ -85,17 +85,18 @@ function generateMaze() {
 
     // Add moving walls
     movingWalls = [];
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 5; i++) {  // Increased number of moving walls
         let x, y;
         do {
             x = Math.floor(Math.random() * MAZE_SIZE);
-            y = Math.floor(Math.random() * MAZE_SIZE);
+            y = Math.floor(Math.random() * (MAZE_SIZE - 4)) + 2;  // Keep walls away from edges
         } while (maze[y][x] === 1 || (x === player.x && y === player.y));
         movingWalls.push({ 
             x, 
             y, 
             originalY: y,
-            direction: Math.random() < 0.5 ? 1 : -1  // Random direction for each wall
+            direction: Math.random() < 0.5 ? 1 : -1,  // Random direction for each wall
+            range: 1 + Math.random() * 2  // Random movement range for each wall
         });
     }
 }
@@ -105,12 +106,12 @@ function updateMovingWalls() {
     for (let wall of movingWalls) {
         wall.y += wallSpeed * wall.direction;
         
-        // Check boundaries
-        if (wall.y >= wall.originalY + 2) {
-            wall.y = wall.originalY + 2;
+        // Check boundaries using wall's individual range
+        if (wall.y >= wall.originalY + wall.range) {
+            wall.y = wall.originalY + wall.range;
             wall.direction = -1;
-        } else if (wall.y <= wall.originalY - 2) {
-            wall.y = wall.originalY - 2;
+        } else if (wall.y <= wall.originalY - wall.range) {
+            wall.y = wall.originalY - wall.range;
             wall.direction = 1;
         }
     }
