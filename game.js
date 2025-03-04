@@ -157,9 +157,6 @@ function handleKeyPress(event) {
         if (canMove) {
             player.x = newX;
             player.y = newY;
-            // Play move sound
-            assets.sounds.move.currentTime = 0;
-            assets.sounds.move.play().catch(() => {});
             checkFruitCollection();
         }
     }
@@ -173,10 +170,6 @@ function checkFruitCollection() {
             score++;
             createParticles(player.x, player.y, NEON_PINK);
             document.getElementById('score').textContent = `Score: ${score}/3`;
-            
-            // Play collect sound
-            assets.sounds.collect.currentTime = 0;
-            assets.sounds.collect.play().catch(() => {});
             
             if (score === 3) {
                 winGame();
@@ -310,10 +303,6 @@ function draw() {
 function winGame() {
     clearInterval(gameLoop);
     document.getElementById('win-overlay').style.display = 'flex';
-    
-    // Play win sound
-    assets.sounds.win.currentTime = 0;
-    assets.sounds.win.play().catch(() => {});
     
     // Create multiple celebration effects
     for (let i = 0; i < 5; i++) {
