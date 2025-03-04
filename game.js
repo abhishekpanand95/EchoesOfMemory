@@ -15,6 +15,20 @@ let fruits = [];
 let score = 0;
 let gameLoop;
 let particles = [];
+let movingWalls = [];
+let wallSpeed = 0.5;
+let wallDirection = 1;
+
+// Load assets
+const assets = {
+    robot: new Image(),
+    fruit: new Image(),
+    wall: new Image()
+};
+
+assets.robot.src = 'assets/robot.png';
+assets.fruit.src = 'assets/fruit.png';
+assets.wall.src = 'assets/wall.png';
 
 // Initialize game
 function init() {
@@ -78,6 +92,33 @@ function generateMaze() {
         } while (maze[y][x] === 1 || (x === player.x && y === player.y));
         fruits.push({ x, y });
     }
+
+    // Add moving walls
+    movingWalls = [];
+    for (let i = 0; i < 3; i++) {
+        let x, y;
+        do {
+            x = Math.floor(Math.random() * MAZE_SIZE);
+            y = Math.floor(Math.random() * MAZE_SIZE);
+        } while (maze[y][x] === 1 || (x === player.x && y === player.y));
+        movingWalls.push({ x, y, originalY: y });
+    }
+}
+
+// Update moving walls
+function updateMovingWalls() {
+    for (let wall of movingWalls) {
+        wall.y += wallSpeed * wallDirection;
+        
+        // Check boundaries
+        if (wall.y >= wall.originalY + 2) {
+            wall.y = wall.originalY + 2;
+            wallDirection = -1;
+        } else if (wall.y <= wall.originalY - 2) {
+            wall.y = wall.originalY - 2;
+            wallDirection = 1;
+        }
+    }
 }
 
 // Handle keyboard input
@@ -111,10 +152,22 @@ function handleKeyPress(event) {
             return;
     }
     
+    // Check if move is valid
     if (newX >= 0 && newX < MAZE_SIZE && newY >= 0 && newY < MAZE_SIZE && maze[newY][newX] === 0) {
-        player.x = newX;
-        player.y = newY;
-        checkFruitCollection();
+        // Check for moving walls
+        let canMove = true;
+        for (let wall of movingWalls) {
+            if (Math.floor(wall.y) === newY && wall.x === newX) {
+                canMove = false;
+                break;
+            }
+        }
+        
+        if (canMove) {
+            player.x = newX;
+            player.y = newY;
+            checkFruitCollection();
+        }
     }
 }
 
@@ -163,6 +216,9 @@ function update() {
         }
     }
     
+    // Update moving walls
+    updateMovingWalls();
+    
     draw();
 }
 
@@ -176,8 +232,8 @@ function draw() {
     for (let y = 0; y < MAZE_SIZE; y++) {
         for (let x = 0; x < MAZE_SIZE; x++) {
             if (maze[y][x] === 1) {
-                ctx.fillStyle = NEON_BLUE;
-                ctx.fillRect(
+                ctx.drawImage(
+                    assets.wall,
                     x * CELL_SIZE + MARGIN,
                     y * CELL_SIZE + MARGIN,
                     CELL_SIZE,
@@ -187,31 +243,36 @@ function draw() {
         }
     }
     
-    // Draw fruits
-    ctx.fillStyle = NEON_PURPLE;
-    for (let fruit of fruits) {
-        ctx.beginPath();
-        ctx.arc(
-            fruit.x * CELL_SIZE + MARGIN + CELL_SIZE/2,
-            fruit.y * CELL_SIZE + MARGIN + CELL_SIZE/2,
-            CELL_SIZE/3,
-            0,
-            Math.PI * 2
+    // Draw moving walls
+    for (let wall of movingWalls) {
+        ctx.drawImage(
+            assets.wall,
+            wall.x * CELL_SIZE + MARGIN,
+            wall.y * CELL_SIZE + MARGIN,
+            CELL_SIZE,
+            CELL_SIZE
         );
-        ctx.fill();
+    }
+    
+    // Draw fruits
+    for (let fruit of fruits) {
+        ctx.drawImage(
+            assets.fruit,
+            fruit.x * CELL_SIZE + MARGIN,
+            fruit.y * CELL_SIZE + MARGIN,
+            CELL_SIZE,
+            CELL_SIZE
+        );
     }
     
     // Draw player
-    ctx.fillStyle = NEON_GREEN;
-    ctx.beginPath();
-    ctx.arc(
-        player.x * CELL_SIZE + MARGIN + CELL_SIZE/2,
-        player.y * CELL_SIZE + MARGIN + CELL_SIZE/2,
-        CELL_SIZE/3,
-        0,
-        Math.PI * 2
+    ctx.drawImage(
+        assets.robot,
+        player.x * CELL_SIZE + MARGIN,
+        player.y * CELL_SIZE + MARGIN,
+        CELL_SIZE,
+        CELL_SIZE
     );
-    ctx.fill();
     
     // Draw particles
     for (let p of particles) {
