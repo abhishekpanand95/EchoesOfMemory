@@ -30,6 +30,34 @@ const assets = {
     wall: new Image()
 };
 
+// Create wall sprite if image fails to load
+function createWallSprite() {
+    const wallCanvas = document.createElement('canvas');
+    wallCanvas.width = CELL_SIZE;
+    wallCanvas.height = CELL_SIZE;
+    const wallCtx = wallCanvas.getContext('2d');
+    
+    // Draw wall with gradient
+    const gradient = wallCtx.createLinearGradient(0, 0, CELL_SIZE, CELL_SIZE);
+    gradient.addColorStop(0, NEON_BLUE);
+    gradient.addColorStop(1, '#0088ff');
+    
+    wallCtx.fillStyle = gradient;
+    wallCtx.fillRect(0, 0, CELL_SIZE, CELL_SIZE);
+    
+    // Add some details
+    wallCtx.strokeStyle = '#ffffff';
+    wallCtx.lineWidth = 2;
+    wallCtx.strokeRect(2, 2, CELL_SIZE - 4, CELL_SIZE - 4);
+    
+    return wallCanvas;
+}
+
+// Handle asset loading
+assets.wall.onerror = () => {
+    assets.wall = createWallSprite();
+};
+
 assets.robot.src = 'assets/robot.png';
 assets.fruits[0].src = 'assets/apple.png';
 assets.fruits[1].src = 'assets/banana.png';
@@ -238,26 +266,46 @@ function draw() {
     for (let y = 0; y < MAZE_SIZE; y++) {
         for (let x = 0; x < MAZE_SIZE; x++) {
             if (maze[y][x] === 1) {
-                ctx.drawImage(
-                    assets.wall,
-                    x * CELL_SIZE + MARGIN,
-                    y * CELL_SIZE + MARGIN,
-                    CELL_SIZE,
-                    CELL_SIZE
-                );
+                if (assets.wall instanceof HTMLCanvasElement) {
+                    ctx.drawImage(
+                        assets.wall,
+                        x * CELL_SIZE + MARGIN,
+                        y * CELL_SIZE + MARGIN,
+                        CELL_SIZE,
+                        CELL_SIZE
+                    );
+                } else {
+                    ctx.drawImage(
+                        assets.wall,
+                        x * CELL_SIZE + MARGIN,
+                        y * CELL_SIZE + MARGIN,
+                        CELL_SIZE,
+                        CELL_SIZE
+                    );
+                }
             }
         }
     }
     
     // Draw moving walls
     for (let wall of movingWalls) {
-        ctx.drawImage(
-            assets.wall,
-            wall.x * CELL_SIZE + MARGIN,
-            wall.y * CELL_SIZE + MARGIN,
-            CELL_SIZE,
-            CELL_SIZE
-        );
+        if (assets.wall instanceof HTMLCanvasElement) {
+            ctx.drawImage(
+                assets.wall,
+                wall.x * CELL_SIZE + MARGIN,
+                wall.y * CELL_SIZE + MARGIN,
+                CELL_SIZE,
+                CELL_SIZE
+            );
+        } else {
+            ctx.drawImage(
+                assets.wall,
+                wall.x * CELL_SIZE + MARGIN,
+                wall.y * CELL_SIZE + MARGIN,
+                CELL_SIZE,
+                CELL_SIZE
+            );
+        }
     }
     
     // Draw fruits
