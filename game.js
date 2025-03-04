@@ -35,12 +35,40 @@ const assets = {
     }
 };
 
+// Create fallback sprites
+function createFallbackSprite(color) {
+    const spriteCanvas = document.createElement('canvas');
+    spriteCanvas.width = CELL_SIZE;
+    spriteCanvas.height = CELL_SIZE;
+    const spriteCtx = spriteCanvas.getContext('2d');
+    
+    // Draw circle with gradient
+    const gradient = spriteCtx.createRadialGradient(
+        CELL_SIZE/2, CELL_SIZE/2, 0,
+        CELL_SIZE/2, CELL_SIZE/2, CELL_SIZE/2
+    );
+    gradient.addColorStop(0, color);
+    gradient.addColorStop(1, '#000000');
+    
+    spriteCtx.fillStyle = gradient;
+    spriteCtx.beginPath();
+    spriteCtx.arc(CELL_SIZE/2, CELL_SIZE/2, CELL_SIZE/2 - 2, 0, Math.PI * 2);
+    spriteCtx.fill();
+    
+    return spriteCanvas;
+}
+
 // Add error handling for images
 function handleImageError(img, name) {
     img.onerror = () => {
         console.error(`Failed to load image: ${name}`);
         if (name === 'wall') {
             assets.wall = createWallSprite();
+        } else if (name === 'robot') {
+            assets.robot = createFallbackSprite(NEON_GREEN);
+        } else if (name.startsWith('fruit')) {
+            const index = parseInt(name.split('_')[1]);
+            assets.fruits[index] = createFallbackSprite(NEON_PURPLE);
         }
     };
     img.onload = () => {
@@ -50,9 +78,9 @@ function handleImageError(img, name) {
 
 // Handle asset loading
 handleImageError(assets.robot, 'robot');
-handleImageError(assets.fruits[0], 'apple');
-handleImageError(assets.fruits[1], 'banana');
-handleImageError(assets.fruits[2], 'orange');
+handleImageError(assets.fruits[0], 'fruit_0');
+handleImageError(assets.fruits[1], 'fruit_1');
+handleImageError(assets.fruits[2], 'fruit_2');
 handleImageError(assets.wall, 'wall');
 
 // Set image sources
