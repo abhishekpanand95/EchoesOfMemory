@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Echoes of Memory</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #0a0a0a;
+            color: #fff;
+            font-family: 'Arial', sans-serif;
+        }
+        #nav-bar {
+            width: 100%;
+            background: linear-gradient(to right, #1a1a2e, #16213e);
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+        }
+        #title {
+            font-size: 1.5rem;
+            color: #00ffff;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+            margin: 0;
+        }
+        #score {
+            font-size: 1.2rem;
+            color: #ff00ff;
+            text-shadow: 0 0 10px rgba(255, 0, 255, 0.5);
+        }
+        #game-container {
+            margin: 2rem;
+            position: relative;
+        }
+        canvas {
+            border: 2px solid #00ffff;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+        }
+        #controls {
+            margin-top: 1rem;
+            text-align: center;
+            color: #888;
+        }
+        #win-overlay {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        #win-message {
+            font-size: 2rem;
+            color: #00ff00;
+            text-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+            margin-bottom: 1rem;
+        }
+        #restart-button {
+            padding: 0.5rem 1rem;
+            font-size: 1.2rem;
+            background: #00ff00;
+            border: none;
+            border-radius: 5px;
+            color: #000;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        #restart-button:hover {
+            background: #00cc00;
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body>
+    <div id="nav-bar">
+        <h1 id="title">Echoes of Memory</h1>
+        <div id="score">Score: 0/3</div>
+    </div>
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+        <div id="win-overlay">
+            <div id="win-message">Memory Restored!</div>
+            <button id="restart-button">Play Again</button>
+        </div>
+    </div>
+    <div id="controls">
+        Use Arrow Keys or WASD to move | ESC to quit | R to restart
+    </div>
+    <script src="game.js"></script>
+</body>
+</html> 
