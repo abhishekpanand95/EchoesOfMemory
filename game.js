@@ -19,100 +19,6 @@ let movingWalls = [];
 let wallSpeed = 0.5;
 let wallDirection = 1;
 
-// Load assets
-const assets = {
-    robot: new Image(),
-    fruits: [
-        new Image(),
-        new Image(),
-        new Image()
-    ],
-    wall: new Image(),
-    sounds: {
-        collect: new Audio('assets/music/ambient1.mp3'),
-        move: new Audio('assets/music/ambient2.mp3'),
-        win: new Audio('assets/music/ambient3.mp3')
-    }
-};
-
-// Create fallback sprites
-function createFallbackSprite(color) {
-    const spriteCanvas = document.createElement('canvas');
-    spriteCanvas.width = CELL_SIZE;
-    spriteCanvas.height = CELL_SIZE;
-    const spriteCtx = spriteCanvas.getContext('2d');
-    
-    // Draw circle with gradient
-    const gradient = spriteCtx.createRadialGradient(
-        CELL_SIZE/2, CELL_SIZE/2, 0,
-        CELL_SIZE/2, CELL_SIZE/2, CELL_SIZE/2
-    );
-    gradient.addColorStop(0, color);
-    gradient.addColorStop(1, '#000000');
-    
-    spriteCtx.fillStyle = gradient;
-    spriteCtx.beginPath();
-    spriteCtx.arc(CELL_SIZE/2, CELL_SIZE/2, CELL_SIZE/2 - 2, 0, Math.PI * 2);
-    spriteCtx.fill();
-    
-    return spriteCanvas;
-}
-
-// Add error handling for images
-function handleImageError(img, name) {
-    img.onerror = () => {
-        console.error(`Failed to load image: ${name}`);
-        if (name === 'wall') {
-            assets.wall = createWallSprite();
-        } else if (name === 'robot') {
-            assets.robot = createFallbackSprite(NEON_GREEN);
-        } else if (name.startsWith('fruit')) {
-            const index = parseInt(name.split('_')[1]);
-            assets.fruits[index] = createFallbackSprite(NEON_PURPLE);
-        }
-    };
-    img.onload = () => {
-        console.log(`Successfully loaded image: ${name}`);
-    };
-}
-
-// Handle asset loading
-handleImageError(assets.robot, 'robot');
-handleImageError(assets.fruits[0], 'fruit_0');
-handleImageError(assets.fruits[1], 'fruit_1');
-handleImageError(assets.fruits[2], 'fruit_2');
-handleImageError(assets.wall, 'wall');
-
-// Set image sources
-assets.robot.src = 'assets/robot.png';
-assets.fruits[0].src = 'assets/apple.png';
-assets.fruits[1].src = 'assets/banana.png';
-assets.fruits[2].src = 'assets/orange.png';
-assets.wall.src = 'assets/wall.png';
-
-// Create wall sprite if image fails to load
-function createWallSprite() {
-    const wallCanvas = document.createElement('canvas');
-    wallCanvas.width = CELL_SIZE;
-    wallCanvas.height = CELL_SIZE;
-    const wallCtx = wallCanvas.getContext('2d');
-    
-    // Draw wall with gradient
-    const gradient = wallCtx.createLinearGradient(0, 0, CELL_SIZE, CELL_SIZE);
-    gradient.addColorStop(0, NEON_BLUE);
-    gradient.addColorStop(1, '#0088ff');
-    
-    wallCtx.fillStyle = gradient;
-    wallCtx.fillRect(0, 0, CELL_SIZE, CELL_SIZE);
-    
-    // Add some details
-    wallCtx.strokeStyle = '#ffffff';
-    wallCtx.lineWidth = 2;
-    wallCtx.strokeRect(2, 2, CELL_SIZE - 4, CELL_SIZE - 4);
-    
-    return wallCanvas;
-}
-
 // Initialize game
 function init() {
     console.log('Initializing game...');
@@ -324,67 +230,72 @@ function draw() {
     for (let y = 0; y < MAZE_SIZE; y++) {
         for (let x = 0; x < MAZE_SIZE; x++) {
             if (maze[y][x] === 1) {
-                if (assets.wall instanceof HTMLCanvasElement) {
-                    ctx.drawImage(
-                        assets.wall,
-                        x * CELL_SIZE + MARGIN,
-                        y * CELL_SIZE + MARGIN,
-                        CELL_SIZE,
-                        CELL_SIZE
-                    );
-                } else {
-                    ctx.drawImage(
-                        assets.wall,
-                        x * CELL_SIZE + MARGIN,
-                        y * CELL_SIZE + MARGIN,
-                        CELL_SIZE,
-                        CELL_SIZE
-                    );
-                }
+                // Draw wall
+                ctx.fillStyle = NEON_BLUE;
+                ctx.fillRect(
+                    x * CELL_SIZE + MARGIN,
+                    y * CELL_SIZE + MARGIN,
+                    CELL_SIZE,
+                    CELL_SIZE
+                );
+                // Add border
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(
+                    x * CELL_SIZE + MARGIN + 2,
+                    y * CELL_SIZE + MARGIN + 2,
+                    CELL_SIZE - 4,
+                    CELL_SIZE - 4
+                );
             }
         }
     }
     
     // Draw moving walls
     for (let wall of movingWalls) {
-        if (assets.wall instanceof HTMLCanvasElement) {
-            ctx.drawImage(
-                assets.wall,
-                wall.x * CELL_SIZE + MARGIN,
-                wall.y * CELL_SIZE + MARGIN,
-                CELL_SIZE,
-                CELL_SIZE
-            );
-        } else {
-            ctx.drawImage(
-                assets.wall,
-                wall.x * CELL_SIZE + MARGIN,
-                wall.y * CELL_SIZE + MARGIN,
-                CELL_SIZE,
-                CELL_SIZE
-            );
-        }
-    }
-    
-    // Draw fruits
-    for (let i = 0; i < fruits.length; i++) {
-        ctx.drawImage(
-            assets.fruits[i % assets.fruits.length],
-            fruits[i].x * CELL_SIZE + MARGIN,
-            fruits[i].y * CELL_SIZE + MARGIN,
+        ctx.fillStyle = NEON_BLUE;
+        ctx.fillRect(
+            wall.x * CELL_SIZE + MARGIN,
+            wall.y * CELL_SIZE + MARGIN,
             CELL_SIZE,
             CELL_SIZE
         );
+        // Add border
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(
+            wall.x * CELL_SIZE + MARGIN + 2,
+            wall.y * CELL_SIZE + MARGIN + 2,
+            CELL_SIZE - 4,
+            CELL_SIZE - 4
+        );
+    }
+    
+    // Draw fruits
+    for (let fruit of fruits) {
+        ctx.fillStyle = NEON_PURPLE;
+        ctx.beginPath();
+        ctx.arc(
+            fruit.x * CELL_SIZE + MARGIN + CELL_SIZE/2,
+            fruit.y * CELL_SIZE + MARGIN + CELL_SIZE/2,
+            CELL_SIZE/3,
+            0,
+            Math.PI * 2
+        );
+        ctx.fill();
     }
     
     // Draw player
-    ctx.drawImage(
-        assets.robot,
-        player.x * CELL_SIZE + MARGIN,
-        player.y * CELL_SIZE + MARGIN,
-        CELL_SIZE,
-        CELL_SIZE
+    ctx.fillStyle = NEON_GREEN;
+    ctx.beginPath();
+    ctx.arc(
+        player.x * CELL_SIZE + MARGIN + CELL_SIZE/2,
+        player.y * CELL_SIZE + MARGIN + CELL_SIZE/2,
+        CELL_SIZE/3,
+        0,
+        Math.PI * 2
     );
+    ctx.fill();
     
     // Draw particles
     for (let p of particles) {
