@@ -27,8 +27,40 @@ const assets = {
         new Image(),
         new Image()
     ],
-    wall: new Image()
+    wall: new Image(),
+    sounds: {
+        collect: new Audio('assets/music/ambient1.mp3'),
+        move: new Audio('assets/music/ambient2.mp3'),
+        win: new Audio('assets/music/ambient3.mp3')
+    }
 };
+
+// Add error handling for images
+function handleImageError(img, name) {
+    img.onerror = () => {
+        console.error(`Failed to load image: ${name}`);
+        if (name === 'wall') {
+            assets.wall = createWallSprite();
+        }
+    };
+    img.onload = () => {
+        console.log(`Successfully loaded image: ${name}`);
+    };
+}
+
+// Handle asset loading
+handleImageError(assets.robot, 'robot');
+handleImageError(assets.fruits[0], 'apple');
+handleImageError(assets.fruits[1], 'banana');
+handleImageError(assets.fruits[2], 'orange');
+handleImageError(assets.wall, 'wall');
+
+// Set image sources
+assets.robot.src = 'assets/robot.png';
+assets.fruits[0].src = 'assets/apple.png';
+assets.fruits[1].src = 'assets/banana.png';
+assets.fruits[2].src = 'assets/orange.png';
+assets.wall.src = 'assets/wall.png';
 
 // Create wall sprite if image fails to load
 function createWallSprite() {
@@ -53,19 +85,9 @@ function createWallSprite() {
     return wallCanvas;
 }
 
-// Handle asset loading
-assets.wall.onerror = () => {
-    assets.wall = createWallSprite();
-};
-
-assets.robot.src = 'assets/robot.png';
-assets.fruits[0].src = 'assets/apple.png';
-assets.fruits[1].src = 'assets/banana.png';
-assets.fruits[2].src = 'assets/orange.png';
-assets.wall.src = 'assets/wall.png';
-
 // Initialize game
 function init() {
+    console.log('Initializing game...');
     canvas = document.getElementById('gameCanvas');
     ctx = canvas.getContext('2d');
     
@@ -82,6 +104,7 @@ function init() {
     
     // Start game loop
     gameLoop = setInterval(update, 1000 / 60);
+    console.log('Game initialized successfully');
 }
 
 // Generate maze using recursive backtracking
@@ -200,6 +223,9 @@ function handleKeyPress(event) {
         if (canMove) {
             player.x = newX;
             player.y = newY;
+            // Play move sound
+            assets.sounds.move.currentTime = 0;
+            assets.sounds.move.play().catch(() => {});
             checkFruitCollection();
         }
     }
@@ -213,6 +239,10 @@ function checkFruitCollection() {
             score++;
             createParticles(player.x, player.y, NEON_PINK);
             document.getElementById('score').textContent = `Score: ${score}/3`;
+            
+            // Play collect sound
+            assets.sounds.collect.currentTime = 0;
+            assets.sounds.collect.play().catch(() => {});
             
             if (score === 3) {
                 winGame();
@@ -341,6 +371,10 @@ function draw() {
 function winGame() {
     clearInterval(gameLoop);
     document.getElementById('win-overlay').style.display = 'flex';
+    
+    // Play win sound
+    assets.sounds.win.currentTime = 0;
+    assets.sounds.win.play().catch(() => {});
     
     // Create multiple celebration effects
     for (let i = 0; i < 5; i++) {
